@@ -372,7 +372,7 @@ function calNBFL(cform) {
       if (ipaddr_usr_input.length == 2){
           var maskip=ipaddr_usr_input[1].match(/\d+/g); // extract all the mask digits without the dot
           var i=0;
-          while (i < 3){
+          while (i < 4){
               if (isNaN(maskip[i]) || maskip[i] > 255 || maskip[i] < 0){
                   cform.errortxt.value = 'ERROR: no valid mask digits';
                   return(1);
@@ -499,7 +499,7 @@ function calcNeeded(cform){
   cform.bits.value=32 - expval;
   calcNWmask(cform,cform.bits.value);
 }
-  
+
 //--------------------------
 function calcAmount(cform){
   var netbits;
@@ -691,9 +691,7 @@ function dot2hex(cform){
   cform.ip_4.value = parseInt(cform.hex.value.substr(6,2),16);
   cform.bits_4.value=h_paddto8(h_from10toradix(cform.ip_4.value,2));
 }
-//--------------------------
 
-// end hiding contents from old browsers  -->
 </script>
 </head>
 
@@ -715,83 +713,83 @@ function dot2hex(cform){
     </li>
   </ul>
 </nav>
-<form onsubmit="calNBFL(this);return false;"> 
+<form onsubmit="calNBFL(this);return false;">
 <br>
-IP/Netmask: <input name="ip" size="32" value="10.0.0.5/24" class="in" type="text" > 
-<input value=" calculate " type="submit">  
-<input value=" reset " onclick="resetform4(this.form)" type="button">
+IP/Mascara de subred: <input name="ip" size="32" value="10.0.0.5/24" class="in" type="text" >
+<input value=" calcular " type="submit">
+<input value=" resetear " onclick="resetform4(this.form)" type="button">
 <br>
 <br>
-<h6>(input format examples: 10.0.0.5/24 or 10.0.0.5 255.255.255.0)</h6>
+<h6>(ejemplos de formato de entrada: 10.0.0.5/24 ó 10.0.0.5 255.255.255.0)</h6>
 <br>
-<input name="errortxt" size="40" readonly="readonly" class="flat" type="text"> 
-<br>result: <br>
+<input name="errortxt" size="40" readonly="readonly" class="flat" type="text">
+<br>Resultado: <br>
 <table summary="result">
 <tbody><tr>
-<td>Usable addresses:</td>
+<td>Host usables:</td>
 <td>
-<input name="numofaddr" size="10" readonly="readonly" type="text"> 
+<input name="numofaddr" size="10" readonly="readonly" type="text">
 <br>
 </td>
 </tr>
 <tr>
-<td>Mask:</td>
+<td>Mascara en decimal:</td>
 <td>
-<input name="snm_1" size="3" readonly="readonly" type="text"> 
-<input name="snm_2" size="3" readonly="readonly" type="text"> 
-<input name="snm_3" size="3" readonly="readonly" type="text"> 
-<input name="snm_4" size="3" readonly="readonly" type="text"> 
-= <input name="bits" size="3" readonly="readonly" type="text"> 
+<input name="snm_1" size="3" readonly="readonly" type="text">
+<input name="snm_2" size="3" readonly="readonly" type="text">
+<input name="snm_3" size="3" readonly="readonly" type="text">
+<input name="snm_4" size="3" readonly="readonly" type="text">
+= <input name="bits" size="3" readonly="readonly" type="text">
 <br>
 </td>
 </tr>
 <tr>
-<td>Mask as hex:</td>
+<td>Mascara en hexa:</td>
 <td>
-<input name="hex_1" size="3" readonly="readonly" type="text"> 
-<input name="hex_2" size="3" readonly="readonly" type="text"> 
-<input name="hex_3" size="3" readonly="readonly" type="text"> 
-<input name="hex_4" size="3" readonly="readonly" type="text"> 
+<input name="hex_1" size="3" readonly="readonly" type="text">
+<input name="hex_2" size="3" readonly="readonly" type="text">
+<input name="hex_3" size="3" readonly="readonly" type="text">
+<input name="hex_4" size="3" readonly="readonly" type="text">
 <br>
 </td>
 </tr>
 <tr>
-<td>Network:</td>
+<td>IP de red:</td>
 <td>
-<input name="nwadr_1" size="3" readonly="readonly" type="text"> 
-<input name="nwadr_2" size="3" readonly="readonly" type="text"> 
-<input name="nwadr_3" size="3" readonly="readonly" type="text"> 
-<input name="nwadr_4" size="3" readonly="readonly" type="text"> 
+<input name="nwadr_1" size="3" readonly="readonly" type="text">
+<input name="nwadr_2" size="3" readonly="readonly" type="text">
+<input name="nwadr_3" size="3" readonly="readonly" type="text">
+<input name="nwadr_4" size="3" readonly="readonly" type="text">
 <br>
 </td>
 </tr>
 <tr>
-<td>First usable:</td>
+<td>Primer host usable:</td>
 <td>
-<input name="firstadr_1" size="3" readonly="readonly" type="text"> 
-<input name="firstadr_2" size="3" readonly="readonly" type="text"> 
-<input name="firstadr_3" size="3" readonly="readonly" type="text"> 
-<input name="firstadr_4" size="3" readonly="readonly" type="text"> 
+<input name="firstadr_1" size="3" readonly="readonly" type="text">
+<input name="firstadr_2" size="3" readonly="readonly" type="text">
+<input name="firstadr_3" size="3" readonly="readonly" type="text">
+<input name="firstadr_4" size="3" readonly="readonly" type="text">
 <br>
 </td>
 </tr>
 <tr>
-<td>Last usable:</td>
+<td>Ultimo host usable:</td>
 <td>
-<input name="lastadr_1" size="3" readonly="readonly" type="text"> 
-<input name="lastadr_2" size="3" readonly="readonly" type="text"> 
-<input name="lastadr_3" size="3" readonly="readonly" type="text"> 
-<input name="lastadr_4" size="3" readonly="readonly" type="text"> 
+<input name="lastadr_1" size="3" readonly="readonly" type="text">
+<input name="lastadr_2" size="3" readonly="readonly" type="text">
+<input name="lastadr_3" size="3" readonly="readonly" type="text">
+<input name="lastadr_4" size="3" readonly="readonly" type="text">
 <br>
 </td>
 </tr>
 <tr>
-<td>Broadcast:</td>
+<td> Direccion broadcast:</td>
 <td>
-<input name="bcast_1" size="3" readonly="readonly" type="text"> 
-<input name="bcast_2" size="3" readonly="readonly" type="text"> 
-<input name="bcast_3" size="3" readonly="readonly" type="text"> 
-<input name="bcast_4" size="3" readonly="readonly" type="text"> 
+<input name="bcast_1" size="3" readonly="readonly" type="text">
+<input name="bcast_2" size="3" readonly="readonly" type="text">
+<input name="bcast_3" size="3" readonly="readonly" type="text">
+<input name="bcast_4" size="3" readonly="readonly" type="text">
 </td>
 </tr>
 </tbody></table>
