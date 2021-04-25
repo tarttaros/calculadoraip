@@ -1,487 +1,535 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
-  <style>
-  div
-  {
-    background-image: url('https://images.pexels.com/photos/249203/pexels-photo-249203.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260');
-    background-size:cover;
-    color: white;
-  }
-  </style>
-  <title>Calculadora IP</title>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <!-- Latest compiled and minified CSS -->
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-  <!-- jQuery library -->
-  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-  <!-- Popper JS -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
-  <!-- Latest compiled JavaScript -->
-  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
-  <!--<script src="/javaScript/proyecto_infra.js"></script>-->
-  <script type="text/javascript" language="JavaScript">
-function h_initArray()
-{
-  this.length = h_initArray.arguments.length;
-  for (var i = 0; i < this.length; i++)
-      this[i] = h_initArray.arguments[i];
-}
-
-function h_from10toradix(value,radix)
-{
-  var retval = '';
-  var ConvArray = new h_initArray(0,1,2,3,4,5,6,7,8,9,'A','B','C','D','E','F');
-  var intnum;
-  var tmpnum;
-  var i = 0;
-
-  intnum = parseInt(value,10);
-  if (isNaN(intnum))
-  {
-      retval = 'NaN';
-  }else
-  {
-      if (intnum < 1)
-      {
-          retval ="0";
-      }else{
-          retval = "";
-      }
-      while (intnum > 0.9)
-      {
-          i++;
-          tmpnum = intnum;
-          // cancatinate return string with new digit:
-          retval = ConvArray[tmpnum % radix] + retval;
-          intnum = Math.floor(tmpnum / radix);
-          if (i > 100)
-          {
-              // break infinite loops
-              retval = 'NaN';
-              break;
-          }
-      }
-  }
-  return retval;
-}
-
-function h_paddto2(str)
-{
-  while(str.length <2)
-  {
-      str= "0" + str;
-  }
-  return(str);
-}
-
-function h_paddto8(str)
-{
-  while(str.length <8)
-  {
-      str= "0" + str;
-  }
-  return(str);
-}
-
-// convierte de bits a decimal
-function h_fillbitsfromleft(num)
-{
-  if (num >= 8 )
-  {
-      return(255);
-  }
-  bitpat=0xff00;
-  while (num > 0)
-  {
-      bitpat=bitpat >> 1;
-      num--;
-  }
-  return(bitpat & 0xff);
-}
-
-// llena los campos de la "mascara en hexa"
-function fillhexNWmask(cform)
-{
-  var tmpvar;
-  tmpvar=cform.snm_1.value;
-  cform.hex_1.value = h_paddto2(h_from10toradix(tmpvar,16));
-  tmpvar=cform.snm_2.value;
-  cform.hex_2.value = h_paddto2(h_from10toradix(tmpvar,16));
-  tmpvar=cform.snm_3.value;
-  cform.hex_3.value = h_paddto2(h_from10toradix(tmpvar,16));
-  tmpvar=cform.snm_4.value;
-  cform.hex_4.value = h_paddto2(h_from10toradix(tmpvar,16));
-}
-
-// retorna la cantidad de bits en 1 de un decimal
-function h_countbitsfromleft(num)
-{
-    if (num == 255 )
-    {
-        return(8);
-    }
-    i = 0;
-    bitpat=0xff00;
-    while (i < 8)
-    {
-        if (num == (bitpat & 0xff))
-        {
-            return(i);
+    <style>
+        div {
+            background-image: url('https://images.pexels.com/photos/249203/pexels-photo-249203.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260');
+            background-size: cover;
+            color: white;
         }
-        bitpat=bitpat >> 1;
-        i++;
-    }
-    return(Number.NaN);
-}
+    </style>
+    <title>Calculadora IP</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- jQuery library -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!-- Popper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <!-- Latest compiled JavaScript -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!--<script src="/javaScript/proyecto_infra.js"></script>-->
+    <script type="text/javascript" language="JavaScript">
 
-// retorna la mascara en formato simplificado, tira -1 en caso de error
-function calcNWbits(maskip)
-{
-    var sumofbits=0;
-    var bitsfromleft;
-    bitsfromleft=h_countbitsfromleft(maskip[0]);
-    if (isNaN(bitsfromleft)){
-        return(-1);
-    }
-    sumofbits+=bitsfromleft;
-    //
-    bitsfromleft=h_countbitsfromleft(maskip[1]);
-    if (isNaN(bitsfromleft)){
-        return(-1);
-    }
-    sumofbits+=bitsfromleft;
-    //
-    bitsfromleft=h_countbitsfromleft(maskip[2]);
-    if (isNaN(bitsfromleft)){
-        return(-1);
-    }
-    sumofbits+=bitsfromleft;
-    //
-    bitsfromleft=h_countbitsfromleft(maskip[3]);
-    if (isNaN(bitsfromleft)){
-        return(-1);
-    }
-    sumofbits+=bitsfromleft;
-    return(sumofbits);
-}
+        //inicializa un array
+        function h_initArray() {
+            this.length = h_initArray.arguments.length;
+            for (var i = 0; i < this.length; i++)
+                this[i] = h_initArray.arguments[i];
+        }
 
-// llena los campos de la "mascara en decimal"
-function calcNWmask(cform,netbits)
-{
-  if (isNaN(netbits) || netbits > 32 || netbits < 0) // en caso de ser nula, mayor a 32 o menor a 0 se informa como error y se reinician los campos
-  {
-      cform.snm_1.value = 'ERR';
-      cform.snm_2.value="";
-      cform.snm_3.value="";
-      cform.snm_4.value="";
-      return(1);
-  }
-  cform.bits.value=netbits; // netbits toma el numero de bits en 1 de la mascara
-  cform.snm_1.value=0;
-  cform.snm_2.value=0;
-  cform.snm_3.value=0;
-  cform.snm_4.value=0;
-  if (netbits >= 8) // si la cantidad de bits en 1 es mayor o igual a 8 se pone 255 en el campo y se resta 8
-  {
-      cform.snm_1.value = 255;
-      netbits-=8;
-  }else // si es menor a 8 se pone en decimal el numero de bits en 1
-  {
-      cform.snm_1.value = h_fillbitsfromleft(netbits);
-      return(0);
-  }
-  if (netbits >= 8) // si la cantidad de bits en 1 es mayor o igual a 8 se pone 255 en el campo y se resta 8
-  {
-      cform.snm_2.value = 255;
-      netbits-=8;
-  }else // si es menor a 8 se pone en decimal el numero de bits en 1
-  {
-      cform.snm_2.value = h_fillbitsfromleft(netbits);
-      return(0);
-  }
-  if (netbits >= 8) // si la cantidad de bits en 1 es mayor o igual a 8 se pone 255 en el campo y se resta 8
-  {
-      cform.snm_3.value = 255;
-      netbits-=8;
-  }else // si es menor a 8 se pone en decimal el numero de bits en 1
-  {
-      cform.snm_3.value = h_fillbitsfromleft(netbits);
-      return(0);
-  }
-  cform.snm_4.value = h_fillbitsfromleft(netbits); // se llena el 4to campo con la cantidad restante de bits de forma decimal
-  return(0);
-}
+        // convierte de decimal a hexa
+        function h_from10toradix(value, radix) {
+            var retval = '';
+            var ConvArray = new h_initArray(0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 'A', 'B', 'C', 'D', 'E', 'F');
+            var intnum;
+            var tmpnum;
+            var i = 0;
 
-// funcion que resetea los campos
-function reset_rest_from4(cform)
-{
-  cform.bcast_1.value ="";
-  cform.bcast_2.value ="";
-  cform.bcast_3.value ="";
-  cform.bcast_4.value ="";
-  //
-  cform.nwadr_1.value ="";
-  cform.nwadr_2.value ="";
-  cform.nwadr_3.value ="";
-  cform.nwadr_4.value ="";
-  //
-  cform.firstadr_1.value ="";
-  cform.firstadr_2.value ="";
-  cform.firstadr_3.value ="";
-  cform.firstadr_4.value ="";
-  //
-  cform.lastadr_1.value ="";
-  cform.lastadr_2.value ="";
-  cform.lastadr_3.value ="";
-  cform.lastadr_4.value ="";
-  //
-  cform.bits.value ="";
-  cform.snm_1.value ="";
-  cform.snm_2.value ="";
-  cform.snm_3.value ="";
-  cform.snm_4.value ="";
-  //
-  cform.numofaddr.value ="";
-  //
-  cform.hex_1.value="";
-  cform.hex_2.value="";
-  cform.hex_3.value="";
-  cform.hex_4.value="";
-  cform.errortxt.value="";
-}
+            intnum = parseInt(value, 10);
+            if (isNaN(intnum)) {
+                retval = 'NaN';
+            } else {
+                if (intnum < 1) {
+                    retval = "0";
+                } else {
+                    retval = "";
+                }
+                while (intnum > 0.9) {
+                    i++;
+                    tmpnum = intnum;
+                    // cancatinate return string with new digit:
+                    retval = ConvArray[tmpnum % radix] + retval;
+                    intnum = Math.floor(tmpnum / radix);
+                    if (i > 100) {
+                        // break infinite loops
+                        retval = 'NaN';
+                        break;
+                    }
+                }
+            }
+            return retval;
+        }
 
-// resetea el campo donde se piden la IP y la mascara
-function resetform4(cform)
-{
-  cform.ip.value="10.0.0.5/24";
-  //
-  reset_rest_from4(cform);
-}
+        // añade 0 en caso de que sea solo un elemento para formar el par ( de f -> 0f)
+        function h_paddto2(str) {
+            while (str.length < 2) {
+                str = "0" + str;
+            }
+            return (str);
+        }
 
-// funcion principal
-function calNBFL(cform)
-{
-  var rt=0;
-  reset_rest_from4(cform); // se resetea el formulario
-  var ip=[];
-  var inputstr,firstip,netbits,netbits_str;
-  inputstr=cform.ip.value.replace(/[^0-9\.\/ ]/g," ");
-  inputstr=inputstr.replace(/[ \t]+/g," "); // retira espacios al inicio
-  inputstr=inputstr.replace(/^\D+/,""); // retira elementos no digitos al inicio
-  inputstr=inputstr.replace(/\D+$/,""); // retira elementos no digitos al final
-  cform.ip.value=inputstr; // muestra al usuario nuevamente
-  //
-  ipaddr_usr_input=inputstr.match(/\d+\.\d+\.\d+\.\d+/g); // toma los digitos de la IP
-  if (ipaddr_usr_input==null || ipaddr_usr_input.length < 1) // se valida el tamaño de la IP
-  {
-      cform.errortxt.value = 'ERROR: direccion IPv4 no valida';
-      return(1);
-  }
-  ip=ipaddr_usr_input[0].match(/\d+/g); // se obtienen todos los digitos de la ip sin los puntos
-  var i=0;
-  while (i < 4)
-  {
-      if (isNaN(ip[i]) || ip[i] > 255 || ip[i] < 0) // se valida el tamaño de cada uno de los octetos
-      {
-          cform.errortxt.value = 'ERROR: direccion IPv4 no valida';
-          return(1);
-      }
-      i++;
-  }
-  netbits_str=inputstr.match(/\/\d+/);
-  if (netbits_str && netbits_str.length==1)
-  {
-      netbits=parseInt(netbits_str[0].replace(/\//,""),10); // se obtiene la mascara de subred
-  }else
-  {
-      // tal vez la mascara puede ser dada en formato tipo 255.255.255.0
-      if (ipaddr_usr_input.length == 2)
-      {
-          var maskip=ipaddr_usr_input[1].match(/\d+/g); // se obtiene la mascara sin los puntos
-          var i=0;
-          while (i < 3)
-          {
-              if (isNaN(maskip[i]) || maskip[i] > 255 || maskip[i] < 0) // se valida el tamaño de cada uno de los octetos
-              {
-                  cform.errortxt.value = 'ERROR: tamaño de mascara no permitido';
-                  return(1);
-              }
-              i++;
-          }
-          netbits=calcNWbits(maskip); // se comvierte la mascara en formato simplificado
-      }else // en caso de que no se reconozca el formato se denota como no valida
-      {
-          cform.errortxt.value = 'ERROR: mascara no valida' + ipaddr_usr_input.length;
-          return(1);
-      }
-  }
-  if (netbits > 32 || netbits<0) // se verifica el tamaño de la mascara en formato simplificado
-  {
-      cform.errortxt.value = 'ERROR: tamaño de mascara no permitido';
-      return(1);
-  }
-  rt=calcNWmask(cform,netbits);
-  if (rt !=0 ) // comprueba que si se convirtieran todos los bits de la mascara
-  {
-      // error
-      return(1);
-  }
-  cform.bits.value="/"+netbits; // se inserta un "/" al mostrar la mascara en formato simplificado
-  fillhexNWmask(cform); // llena la mascara en hexa
-  if (netbits == 31) // en caso de que sea /31 la mascara
-  {
-      cform.numofaddr.value = "0";
-      cform.bcast_1.value = ip[0] | (~ cform.snm_1.value & 0xff);
-      cform.bcast_2.value = ip[1] | (~ cform.snm_2.value & 0xff);
-      cform.bcast_3.value = ip[2] | (~ cform.snm_3.value & 0xff);
-      cform.bcast_4.value = ip[3] | (~ cform.snm_4.value & 0xff);
-      //
-      cform.nwadr_1.value = ip[0] & cform.snm_1.value;
-      cform.nwadr_2.value = ip[1] & cform.snm_2.value;
-      cform.nwadr_3.value = ip[2] & cform.snm_3.value;
-      cform.nwadr_4.value = ip[3] & cform.snm_4.value;
-      return(1);
-  }
-  if (netbits == 32) // en caso de que sea /32 la mascara
-  {
-      cform.numofaddr.value = "0";
-      cform.nwadr_1.value = ip[0] & cform.snm_1.value;
-      cform.nwadr_2.value = ip[1] & cform.snm_2.value;
-      cform.nwadr_3.value = ip[2] & cform.snm_3.value;
-      cform.nwadr_4.value = ip[3] & cform.snm_4.value;
-      return(1);
-  }
-  cform.numofaddr.value = Math.pow(2,32 - netbits) - 2;
-  //
-  cform.bcast_1.value = ip[0] | (~ cform.snm_1.value & 0xff);
-  cform.bcast_2.value = ip[1] | (~ cform.snm_2.value & 0xff);
-  cform.bcast_3.value = ip[2] | (~ cform.snm_3.value & 0xff);
-  cform.bcast_4.value = ip[3] | (~ cform.snm_4.value & 0xff);
-  //
-  cform.nwadr_1.value = ip[0] & cform.snm_1.value;
-  cform.nwadr_2.value = ip[1] & cform.snm_2.value;
-  cform.nwadr_3.value = ip[2] & cform.snm_3.value;
-  cform.nwadr_4.value = ip[3] & cform.snm_4.value;
-  //
-  cform.firstadr_1.value = cform.nwadr_1.value;
-  cform.firstadr_2.value = cform.nwadr_2.value;
-  cform.firstadr_3.value = cform.nwadr_3.value;
-  cform.firstadr_4.value = parseInt(cform.nwadr_4.value) + 1;
-  //
-  cform.lastadr_1.value = cform.bcast_1.value;
-  cform.lastadr_2.value = cform.bcast_2.value;
-  cform.lastadr_3.value = cform.bcast_3.value;
-  cform.lastadr_4.value = parseInt(cform.bcast_4.value) - 1;
-  return(0);
-}
-</script>
+        // añade 0´s hasta completa el octeto ( de 111 -> 00000111)
+        function h_paddto8(str) {
+            while (str.length < 8) {
+                str = "0" + str;
+            }
+            return (str);
+        }
+
+        // convierte de binario a decimal
+        function h_fillbitsfromleft(num) {
+            if (num >= 8) {
+                return (255);
+            }
+            bitpat = 0xff00;
+            while (num > 0) {
+                bitpat = bitpat >> 1;
+                num--;
+            }
+            return (bitpat & 0xff);
+        }
+
+        // llena los campos de la "mascara en hexa"
+        function fillhexNWmask(cform) {
+            var tmpvar;
+            tmpvar = cform.snm_1.value;
+            cform.hex_1.value = h_paddto2(h_from10toradix(tmpvar, 16));
+            tmpvar = cform.snm_2.value;
+            cform.hex_2.value = h_paddto2(h_from10toradix(tmpvar, 16));
+            tmpvar = cform.snm_3.value;
+            cform.hex_3.value = h_paddto2(h_from10toradix(tmpvar, 16));
+            tmpvar = cform.snm_4.value;
+            cform.hex_4.value = h_paddto2(h_from10toradix(tmpvar, 16));
+        }
+
+        // retorna la cantidad de bits en 1 de un decimal
+        function h_countbitsfromleft(num) {
+            if (num == 255) {
+                return (8);
+            }
+            i = 0;
+            bitpat = 0xff00;
+            while (i < 8) {
+                if (num == (bitpat & 0xff)) {
+                    return (i);
+                }
+                bitpat = bitpat >> 1;
+                i++;
+            }
+            return (Number.NaN);
+        }
+
+        // retorna la mascara en formato simplificado, tira -1 en caso de error
+        function calcNWbits(maskip) {
+            var sumofbits = 0;
+            var bitsfromleft;
+            bitsfromleft = h_countbitsfromleft(maskip[0]);
+            if (isNaN(bitsfromleft)) {
+                return (-1);
+            }
+            sumofbits += bitsfromleft;
+            //
+            bitsfromleft = h_countbitsfromleft(maskip[1]);
+            if (isNaN(bitsfromleft)) {
+                return (-1);
+            }
+            sumofbits += bitsfromleft;
+            //
+            bitsfromleft = h_countbitsfromleft(maskip[2]);
+            if (isNaN(bitsfromleft)) {
+                return (-1);
+            }
+            sumofbits += bitsfromleft;
+            //
+            bitsfromleft = h_countbitsfromleft(maskip[3]);
+            if (isNaN(bitsfromleft)) {
+                return (-1);
+            }
+            sumofbits += bitsfromleft;
+            return (sumofbits);
+        }
+
+        // llena los campos de la "mascara en decimal"
+        function calcNWmask(cform, netbits) {
+            if (isNaN(netbits) || netbits > 32 || netbits < 0) // en caso de ser nula, mayor a 32 o menor a 0 se informa como error y se reinician los campos
+            {
+                cform.snm_1.value = 'ERR';
+                cform.snm_2.value = "";
+                cform.snm_3.value = "";
+                cform.snm_4.value = "";
+                return (1);
+            }
+            cform.bits.value = netbits; // netbits toma el numero de bits en 1 de la mascara
+            cform.snm_1.value = 0;
+            cform.snm_2.value = 0;
+            cform.snm_3.value = 0;
+            cform.snm_4.value = 0;
+            if (netbits >= 8) // si la cantidad de bits en 1 es mayor o igual a 8 se pone 255 en el campo y se resta 8
+            {
+                cform.snm_1.value = 255;
+                netbits -= 8;
+            } else // si es menor a 8 se pone en decimal el numero de bits en 1
+            {
+                cform.snm_1.value = h_fillbitsfromleft(netbits);
+                return (0);
+            }
+            if (netbits >= 8) // si la cantidad de bits en 1 es mayor o igual a 8 se pone 255 en el campo y se resta 8
+            {
+                cform.snm_2.value = 255;
+                netbits -= 8;
+            } else // si es menor a 8 se pone en decimal el numero de bits en 1
+            {
+                cform.snm_2.value = h_fillbitsfromleft(netbits);
+                return (0);
+            }
+            if (netbits >= 8) // si la cantidad de bits en 1 es mayor o igual a 8 se pone 255 en el campo y se resta 8
+            {
+                cform.snm_3.value = 255;
+                netbits -= 8;
+            } else // si es menor a 8 se pone en decimal el numero de bits en 1
+            {
+                cform.snm_3.value = h_fillbitsfromleft(netbits);
+                return (0);
+            }
+            cform.snm_4.value = h_fillbitsfromleft(netbits); // se llena el 4to campo con la cantidad restante de bits de forma decimal
+            return (0);
+        }
+
+        // funcion que resetea los campos
+        function reset_rest_from4(cform) {
+            cform.bcast_1.value = "";
+            cform.bcast_2.value = "";
+            cform.bcast_3.value = "";
+            cform.bcast_4.value = "";
+            //
+            cform.nwadr_1.value = "";
+            cform.nwadr_2.value = "";
+            cform.nwadr_3.value = "";
+            cform.nwadr_4.value = "";
+            //
+            cform.firstadr_1.value = "";
+            cform.firstadr_2.value = "";
+            cform.firstadr_3.value = "";
+            cform.firstadr_4.value = "";
+            //
+            cform.lastadr_1.value = "";
+            cform.lastadr_2.value = "";
+            cform.lastadr_3.value = "";
+            cform.lastadr_4.value = "";
+            //
+            cform.bits.value = "";
+            cform.snm_1.value = "";
+            cform.snm_2.value = "";
+            cform.snm_3.value = "";
+            cform.snm_4.value = "";
+            //
+            cform.numofaddr.value = "";
+            cform.bh.value = "";
+            cform.br.value = "";
+            document.getElementById('hu').innerHTML = "";
+            //
+            cform.hex_1.value = "";
+            cform.hex_2.value = "";
+            cform.hex_3.value = "";
+            cform.hex_4.value = "";
+            cform.errortxt.value = "";
+        }
+
+        // resetea el campo donde se piden la IP y la mascara
+        function resetform4(cform) {
+            cform.ip.value = "192.168.0.0/24";
+            //
+            reset_rest_from4(cform);
+        }
+
+        // funcion que lista todos los host usables
+        function listHost(cform){
+            var frstdigit,scnddigit,thrddigit,frthdigit,lstfrstdigit,lstscnddigit,lstthrddigit,lstfrthdigit,listh,string1,i;
+            frstdigit = parseInt(cform.firstadr_1.value,10);
+            scnddigit = parseInt(cform.firstadr_2.value,10);
+            thrddigit = parseInt(cform.firstadr_3.value,10);
+            frthdigit = parseInt(cform.firstadr_4.value,10);
+            lstfrstdigit = parseInt(cform.lastadr_1.value,10);
+            lstscnddigit = parseInt(cform.lastadr_2.value,10);
+            lstthrddigit = parseInt(cform.lastadr_3.value,10);
+            lstfrthdigit = parseInt(cform.lastadr_4.value,10);
+            listh = parseInt(cform.numofaddr.value,10);
+            i = 0;
+            string1 = "";
+            while(frstdigit <= lstfrstdigit && i<listh)
+            {
+                while(scnddigit <= scnddigit && i<listh)
+                {
+                    while(thrddigit <= lstthrddigit && i<listh)
+                    {
+                        while(frthdigit <= lstfrthdigit+1 && i<listh)
+                        {
+                            string1+=frstdigit+"."+scnddigit+"."+thrddigit+"."+frthdigit+":"+i+"\n";
+                            frthdigit++;
+                            i++;
+                        }
+                        frthdigit=0;
+                        thrddigit++;
+                    }
+                    thrddigit=0;
+                    scnddigit++;
+                }
+                scnddigit=0;
+                frstdigit++;
+            }
+            document.getElementById('hu').innerHTML = string1;
+            return(0);
+        }
+
+        // funcion principal
+        function calNBFL(cform) {
+            var rt = 0;
+            reset_rest_from4(cform); // se resetea el formulario
+            var ip = [];
+            var inputstr, firstip, netbits, netbits_str;
+            //document.getElementById('hu').innerHTML = "1,2,3,4,5,6\n7,8,9,10,11,12\n7,8,9,10,11,12\n7,8,9,10,11,12\n7,8,9,10,11,12";
+            inputstr = cform.ip.value.replace(/[^0-9\.\/ ]/g, " ");
+            inputstr = inputstr.replace(/[ \t]+/g, " "); // retira espacios al inicio
+            inputstr = inputstr.replace(/^\D+/, ""); // retira elementos no digitos al inicio
+            inputstr = inputstr.replace(/\D+$/, ""); // retira elementos no digitos al final
+            cform.ip.value = inputstr; // muestra al usuario nuevamente
+            ipaddr_usr_input = inputstr.match(/\d+\.\d+\.\d+\.\d+/g); // toma los digitos de la IP
+            if (ipaddr_usr_input == null || ipaddr_usr_input.length < 1) // se valida el tamaño de la IP
+            {
+                cform.errortxt.value = 'ERROR: direccion IPv4 no valida';
+                return (1);
+            }
+            ip = ipaddr_usr_input[0].match(/\d+/g); // se obtienen todos los digitos de la ip sin los puntos
+            var i = 0;
+            while (i < 4) {
+                if (isNaN(ip[i]) || ip[i] > 255 || ip[i] < 0) // se valida el tamaño de cada uno de los octetos
+                {
+                    cform.errortxt.value = 'ERROR: direccion IPv4 no valida';
+                    return (1);
+                }
+                i++;
+            }
+            netbits_str = inputstr.match(/\/\d+/);
+            //document.write(netbits_str);
+            if (netbits_str && netbits_str.length != 2 && netbits_str.length < 3 && netbits_str.length > 0) {
+                netbits = parseInt(netbits_str[0].replace(/\//, ""), 10); // se obtiene la mascara de subred
+            } else {
+                // tal vez la mascara puede ser dada en formato tipo 255.255.255.0
+                if (ipaddr_usr_input.length == 2) {
+                    document.write(ipaddr_usr_input.length);
+                    var maskip = ipaddr_usr_input[1].match(/\d+/g); // se obtiene la mascara sin los puntos
+                    var i = 0;
+                    while (i < 3) {
+                        if (isNaN(maskip[i]) || maskip[i] > 255 || maskip[i] < 0) // se valida el tamaño de cada uno de los octetos
+                        {
+                            cform.errortxt.value = 'ERROR: tamaño de mascara no permitido';
+                            return (1);
+                        }
+                        i++;
+                    }
+                    netbits = calcNWbits(maskip); // se comvierte la mascara en formato simplificado
+                } else // en caso de que no se reconozca el formato se denota como no valida
+                {
+                    cform.errortxt.value = 'ERROR: mascara no valida' + ipaddr_usr_input.length;
+                    return (1);
+                }
+            }
+            if (netbits > 32 || netbits < 0) // se verifica el tamaño de la mascara en formato simplificado
+            {
+                cform.errortxt.value = 'ERROR: tamaño de mascara no permitido';
+                return (1);
+            }
+            rt = calcNWmask(cform, netbits);
+            if (rt != 0) // comprueba que si se convirtieran todos los bits de la mascara
+            {
+                // error
+                return (1);
+            }
+            cform.bits.value = "/" + netbits; // se inserta un "/" al mostrar la mascara en formato simplificado
+            cform.br.value = netbits;
+            cform.bh.value = 32-netbits;
+            fillhexNWmask(cform); // llena la mascara en hexa
+            if (netbits == 31) // en caso de que sea /31 la mascara
+            {
+                cform.numofaddr.value = "0";
+                cform.bcast_1.value = ip[0] | (~cform.snm_1.value & 0xff);
+                cform.bcast_2.value = ip[1] | (~cform.snm_2.value & 0xff);
+                cform.bcast_3.value = ip[2] | (~cform.snm_3.value & 0xff);
+                cform.bcast_4.value = ip[3] | (~cform.snm_4.value & 0xff);
+                //
+                cform.nwadr_1.value = ip[0] & cform.snm_1.value;
+                cform.nwadr_2.value = ip[1] & cform.snm_2.value;
+                cform.nwadr_3.value = ip[2] & cform.snm_3.value;
+                cform.nwadr_4.value = ip[3] & cform.snm_4.value;
+                return (1);
+            }
+            if (netbits == 32) // en caso de que sea /32 la mascara
+            {
+                cform.numofaddr.value = "0";
+                cform.nwadr_1.value = ip[0] & cform.snm_1.value;
+                cform.nwadr_2.value = ip[1] & cform.snm_2.value;
+                cform.nwadr_3.value = ip[2] & cform.snm_3.value;
+                cform.nwadr_4.value = ip[3] & cform.snm_4.value;
+                return (1);
+            }
+            cform.numofaddr.value = Math.pow(2, 32 - netbits) - 2;
+            //
+            cform.bcast_1.value = ip[0] | (~cform.snm_1.value & 0xff);
+            cform.bcast_2.value = ip[1] | (~cform.snm_2.value & 0xff);
+            cform.bcast_3.value = ip[2] | (~cform.snm_3.value & 0xff);
+            cform.bcast_4.value = ip[3] | (~cform.snm_4.value & 0xff);
+            //
+            cform.nwadr_1.value = ip[0] & cform.snm_1.value;
+            cform.nwadr_2.value = ip[1] & cform.snm_2.value;
+            cform.nwadr_3.value = ip[2] & cform.snm_3.value;
+            cform.nwadr_4.value = ip[3] & cform.snm_4.value;
+            //
+            cform.firstadr_1.value = cform.nwadr_1.value;
+            cform.firstadr_2.value = cform.nwadr_2.value;
+            cform.firstadr_3.value = cform.nwadr_3.value;
+            cform.firstadr_4.value = parseInt(cform.nwadr_4.value) + 1;
+            //
+            cform.lastadr_1.value = cform.bcast_1.value;
+            cform.lastadr_2.value = cform.bcast_2.value;
+            cform.lastadr_3.value = cform.bcast_3.value;
+            cform.lastadr_4.value = parseInt(cform.bcast_4.value) - 1;
+            //document.write("alv");
+            listHost(cform);
+            return (0);
+        }
+    </script>
 </head>
 
 <body>
-<div class="jumbotron text-center">
-  <h1>Calculadora IP</h1>
-  <b title="introduccion"> La calculadora IP toma los valores de una direccion IP y
-    su mascara de red (NETMASK) y nos brinda la direccion de red,
-     los host, la direccion broadcast y sus subredes en caso de tenerlas.</b>
-</div>
+    <div class="jumbotron text-center">
+        <h1>Calculadora IP</h1>
+        <b title="introduccion"> La calculadora IP toma los valores de una direccion IP y
+            su mascara de red (NETMASK) y nos brinda la direccion de red,
+            los host, la direccion broadcast y sus subredes en caso de tenerlas.</b>
+    </div>
 
-<nav class="navbar navbar-expand justify-content-center bg-dark navbar-dark">
-  <ul class="navbar-nav">
-    <li class="nav-item">
-      <a class="nav-link">calculadora</a>
-    </li>
-    <li class="nav-item">
-      <a class="nav-link">autores</a>
-    </li>
-  </ul>
-</nav>
-<form onsubmit="calNBFL(this);return false;">
-<br>
-IP/Mascara de subred: <input name="ip" size="32" value="10.0.0.5/24" class="in" type="text" >
-<input value=" calcular " type="submit">
-<input value=" resetear " onclick="resetform4(this.form)" type="button">
-<br>
-<br>
-<h6>(ejemplos de formato de entrada: 10.0.0.5/24 ó 10.0.0.5 255.255.255.0)</h6>
-<br>
-<input name="errortxt" size="40" readonly="readonly" class="flat" type="text">
-<br>Resultado: <br>
-<table summary="result">
-<tbody><tr>
-<td>Host usables:</td>
-<td>
-<input name="numofaddr" size="10" readonly="readonly" type="text">
-<br>
-</td>
-</tr>
-<tr>
-<td>Mascara en decimal:</td>
-<td>
-<input name="snm_1" size="3" readonly="readonly" type="text">
-<input name="snm_2" size="3" readonly="readonly" type="text">
-<input name="snm_3" size="3" readonly="readonly" type="text">
-<input name="snm_4" size="3" readonly="readonly" type="text">
-= <input name="bits" size="3" readonly="readonly" type="text">
-<br>
-</td>
-</tr>
-<tr>
-<td>Mascara en hexa:</td>
-<td>
-<input name="hex_1" size="3" readonly="readonly" type="text">
-<input name="hex_2" size="3" readonly="readonly" type="text">
-<input name="hex_3" size="3" readonly="readonly" type="text">
-<input name="hex_4" size="3" readonly="readonly" type="text">
-<br>
-</td>
-</tr>
-<tr>
-<td>IP de red:</td>
-<td>
-<input name="nwadr_1" size="3" readonly="readonly" type="text">
-<input name="nwadr_2" size="3" readonly="readonly" type="text">
-<input name="nwadr_3" size="3" readonly="readonly" type="text">
-<input name="nwadr_4" size="3" readonly="readonly" type="text">
-<br>
-</td>
-</tr>
-<tr>
-<td>Primer host usable:</td>
-<td>
-<input name="firstadr_1" size="3" readonly="readonly" type="text">
-<input name="firstadr_2" size="3" readonly="readonly" type="text">
-<input name="firstadr_3" size="3" readonly="readonly" type="text">
-<input name="firstadr_4" size="3" readonly="readonly" type="text">
-<br>
-</td>
-</tr>
-<tr>
-<td>Ultimo host usable:</td>
-<td>
-<input name="lastadr_1" size="3" readonly="readonly" type="text">
-<input name="lastadr_2" size="3" readonly="readonly" type="text">
-<input name="lastadr_3" size="3" readonly="readonly" type="text">
-<input name="lastadr_4" size="3" readonly="readonly" type="text">
-<br>
-</td>
-</tr>
-<tr>
-<td> Direccion broadcast:</td>
-<td>
-<input name="bcast_1" size="3" readonly="readonly" type="text">
-<input name="bcast_2" size="3" readonly="readonly" type="text">
-<input name="bcast_3" size="3" readonly="readonly" type="text">
-<input name="bcast_4" size="3" readonly="readonly" type="text">
-</td>
-</tr>
-</tbody>
-</table>
-</form>
-<br>
-<br>
-<br><hr>
-<br><hr>
+    <nav class="navbar navbar-expand justify-content-center bg-dark navbar-dark">
+        <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link">calculadora</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link">autores</a>
+            </li>
+        </ul>
+    </nav>
+    <form onsubmit="calNBFL(this);return false;">
+        <br>
+        IP/Mascara de subred: <input name="ip" size="32" value="192.168.0.0/24" class="in" type="text">
+        <input value=" calcular " type="submit">
+        <input value=" resetear " onclick="resetform4(this.form)" type="button">
+        <br>
+        <br>
+        <h6>(ejemplos de formato de entrada: 192.168.0.0/24)</h6>
+        <br>
+        <input name="errortxt" size="40" readonly="readonly" class="flat" type="text">
+        <br>Resultado: <br>
+        <table summary="result">
+            <tbody>
+                <tr>
+                    <td>Host usables:</td>
+                    <td>
+                        <input name="numofaddr" size="10" readonly="readonly" type="text">
+                        <br>
+                    </td>
+                </tr>
+                <tr>
+                    <td>bits para determinar la red:</td>
+                    <td>
+                        <input name="br" size="10" readonly="readonly" type="text">
+                        <br>
+                    </td>
+                </tr>
+                <tr>
+                    <td>bits para determinar los hosts:</td>
+                    <td>
+                        <input name="bh" size="10" readonly="readonly" type="text">
+                        <br>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Mascara en decimal:</td>
+                    <td>
+                        <input name="snm_1" size="3" readonly="readonly" type="text">
+                        <input name="snm_2" size="3" readonly="readonly" type="text">
+                        <input name="snm_3" size="3" readonly="readonly" type="text">
+                        <input name="snm_4" size="3" readonly="readonly" type="text">
+                        = <input name="bits" size="3" readonly="readonly" type="text">
+                        <br>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Mascara en hexa:</td>
+                    <td>
+                        <input name="hex_1" size="3" readonly="readonly" type="text">
+                        <input name="hex_2" size="3" readonly="readonly" type="text">
+                        <input name="hex_3" size="3" readonly="readonly" type="text">
+                        <input name="hex_4" size="3" readonly="readonly" type="text">
+                        <br>
+                    </td>
+                </tr>
+                <tr>
+                    <td>IP de red:</td>
+                    <td>
+                        <input name="nwadr_1" size="3" readonly="readonly" type="text">
+                        <input name="nwadr_2" size="3" readonly="readonly" type="text">
+                        <input name="nwadr_3" size="3" readonly="readonly" type="text">
+                        <input name="nwadr_4" size="3" readonly="readonly" type="text">
+                        <br>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Primer host usable:</td>
+                    <td>
+                        <input name="firstadr_1" size="3" readonly="readonly" type="text">
+                        <input name="firstadr_2" size="3" readonly="readonly" type="text">
+                        <input name="firstadr_3" size="3" readonly="readonly" type="text">
+                        <input name="firstadr_4" size="3" readonly="readonly" type="text">
+                        <br>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Ultimo host usable:</td>
+                    <td>
+                        <input name="lastadr_1" size="3" readonly="readonly" type="text">
+                        <input name="lastadr_2" size="3" readonly="readonly" type="text">
+                        <input name="lastadr_3" size="3" readonly="readonly" type="text">
+                        <input name="lastadr_4" size="3" readonly="readonly" type="text">
+                        <br>
+                    </td>
+                </tr>
+                <tr>
+                    <td> Direccion broadcast:</td>
+                    <td>
+                        <input name="bcast_1" size="3" readonly="readonly" type="text">
+                        <input name="bcast_2" size="3" readonly="readonly" type="text">
+                        <input name="bcast_3" size="3" readonly="readonly" type="text">
+                        <input name="bcast_4" size="3" readonly="readonly" type="text">
+                    </td>
+                </tr>
+                <tr>
+                    <td> lista de host usables:</td>
+                    <td>
+                        <pre id="hu"></pre>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </form>
+    <br>
+    <br>
+    <br>
+    <hr>
+    <br>
+    <hr>
 </body>
+
 </html>
