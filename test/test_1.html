@@ -284,12 +284,30 @@
             return(0);
         }
 
+        // ejercicio aleatorio
+        function random(cform){
+            var pst1,pst2,pst3,pst4,msk,ip;
+            ip = "";
+            pst1 =  Math.floor((Math.random()*255)+1);
+            pst2 =  Math.floor((Math.random()*255)+1);
+            pst3 =  Math.floor((Math.random()*255)+1);
+            pst4 =  Math.floor((Math.random()*255)+1);
+            msk  =  Math.floor((Math.random()*32)+1);
+            while(msk <= 15)
+            {
+                msk  =  Math.floor((Math.random()*32)+1);
+            }
+            ip += pst1+"."+pst2+"."+pst3+"."+pst4+"/"+msk;
+            cform.ip.value = ip;
+            calNBFL(cform)
+        }
+
         // funcion principal
         function calNBFL(cform) {
             var rt = 0;
             reset_rest_from4(cform); // se resetea el formulario
             var ip = [];
-            var inputstr, firstip, netbits, netbits_str;
+            var inputstr, firstip, netbits, netbits_str,netbits_str2;
             //document.getElementById('hu').innerHTML = "1,2,3,4,5,6\n7,8,9,10,11,12\n7,8,9,10,11,12\n7,8,9,10,11,12\n7,8,9,10,11,12";
             inputstr = cform.ip.value.replace(/[^0-9\.\/ ]/g, " ");
             inputstr = inputstr.replace(/[ \t]+/g, " "); // retira espacios al inicio
@@ -303,6 +321,7 @@
                 return (1);
             }
             ip = ipaddr_usr_input[0].match(/\d+/g); // se obtienen todos los digitos de la ip sin los puntos
+            //document.write(ipaddr_usr_input);
             var i = 0;
             while (i < 4) {
                 if (isNaN(ip[i]) || ip[i] > 255 || ip[i] < 0) // se valida el tamaño de cada uno de los octetos
@@ -313,12 +332,12 @@
                 i++;
             }
             netbits_str = inputstr.match(/\/\d+/);
-            //document.write(netbits_str);
-            if (netbits_str && netbits_str.length != 2 && netbits_str.length < 3 && netbits_str.length > 0) {
+            netbits_str2 = inputstr.match(/\/\d+\s\d+/);
+            //document.write(netbits_str,netbits_str2);
+            if (netbits_str.length == 1 && netbits_str2 == null) {
                 netbits = parseInt(netbits_str[0].replace(/\//, ""), 10); // se obtiene la mascara de subred
             } else {
-                // tal vez la mascara puede ser dada en formato tipo 255.255.255.0
-                if (ipaddr_usr_input.length == 2) {
+                if (netbits_str2.length == 1) {
                     document.write(ipaddr_usr_input.length);
                     var maskip = ipaddr_usr_input[1].match(/\d+/g); // se obtiene la mascara sin los puntos
                     var i = 0;
@@ -426,6 +445,7 @@
         IP/Mascara de subred: <input name="ip" size="32" value="192.168.0.0/24" class="in" type="text">
         <input value=" calcular " type="submit">
         <input value=" resetear " onclick="resetform4(this.form)" type="button">
+        <input value=" aleatorio " onclick="random(this.form)" type="button">
         <br>
         <br>
         <h6>(ejemplos de formato de entrada: 192.168.0.0/24)</h6>
