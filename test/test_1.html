@@ -8,6 +8,9 @@
             background-size: cover;
             color: white;
         }
+        .textarea {
+            resize: none;
+        }
     </style>
     <title>Calculadora IP</title>
     <meta charset="utf-8">
@@ -122,40 +125,11 @@
             return (Number.NaN);
         }
 
-        // retorna la mascara en formato simplificado, tira -1 en caso de error
-        function calcNWbits(maskip) {
-            var sumofbits = 0;
-            var bitsfromleft;
-            bitsfromleft = h_countbitsfromleft(maskip[0]);
-            if (isNaN(bitsfromleft)) {
-                return (-1);
-            }
-            sumofbits += bitsfromleft;
-            //
-            bitsfromleft = h_countbitsfromleft(maskip[1]);
-            if (isNaN(bitsfromleft)) {
-                return (-1);
-            }
-            sumofbits += bitsfromleft;
-            //
-            bitsfromleft = h_countbitsfromleft(maskip[2]);
-            if (isNaN(bitsfromleft)) {
-                return (-1);
-            }
-            sumofbits += bitsfromleft;
-            //
-            bitsfromleft = h_countbitsfromleft(maskip[3]);
-            if (isNaN(bitsfromleft)) {
-                return (-1);
-            }
-            sumofbits += bitsfromleft;
-            return (sumofbits);
-        }
-
         // llena los campos de la "mascara en decimal"
         function calcNWmask(cform, netbits) {
-            if (isNaN(netbits) || netbits > 32 || netbits < 0) // en caso de ser nula, mayor a 32 o menor a 0 se informa como error y se reinician los campos
+            if (isNaN(netbits) || netbits > 30 || netbits < 0) // en caso de ser nula, mayor a 30 o menor a 0 se informa como error y se reinician los campos
             {
+                //document.write(netbits);
                 cform.snm_1.value = 'ERR';
                 cform.snm_2.value = "";
                 cform.snm_3.value = "";
@@ -230,6 +204,11 @@
             cform.bh.value = "";
             cform.br.value = "";
             document.getElementById('hu').innerHTML = "";
+            document.getElementById('sr').innerHTML = "";
+            cform.bsr.value = "";
+            cform.bsrh.value = "";
+            cform.sru.value = "";
+            cform.hupsr.value = "";
             //
             cform.hex_1.value = "";
             cform.hex_2.value = "";
@@ -267,7 +246,7 @@
                     {
                         while(frthdigit <= lstfrthdigit+1 && i<listh)
                         {
-                            string1+=frstdigit+"."+scnddigit+"."+thrddigit+"."+frthdigit+":"+i+"\n";
+                            string1+=frstdigit+"."+scnddigit+"."+thrddigit+"."+frthdigit+"\n";
                             frthdigit++;
                             i++;
                         }
@@ -284,18 +263,24 @@
             return(0);
         }
 
+        //concatena todas y cada una de las subredes
+        function subredes(cform){
+
+        }
+
         // ejercicio aleatorio
         function random(cform){
             var pst1,pst2,pst3,pst4,msk,ip;
+            cform.subredBits.value = " ";
             ip = "";
             pst1 =  Math.floor((Math.random()*255)+1);
-            pst2 =  Math.floor((Math.random()*255)+1);
-            pst3 =  Math.floor((Math.random()*255)+1);
-            pst4 =  Math.floor((Math.random()*255)+1);
-            msk  =  Math.floor((Math.random()*32)+1);
+            pst2 =  Math.floor((Math.random()*256));
+            pst3 =  Math.floor((Math.random()*256));
+            pst4 =  Math.floor((Math.random()*256));
+            msk  =  Math.floor((Math.random()*30)+1);
             while(msk <= 15)
             {
-                msk  =  Math.floor((Math.random()*32)+1);
+                msk  =  Math.floor((Math.random()*30)+1);
             }
             ip += pst1+"."+pst2+"."+pst3+"."+pst4+"/"+msk;
             cform.ip.value = ip;
@@ -307,8 +292,7 @@
             var rt = 0;
             reset_rest_from4(cform); // se resetea el formulario
             var ip = [];
-            var inputstr, firstip, netbits, netbits_str,netbits_str2;
-            //document.getElementById('hu').innerHTML = "1,2,3,4,5,6\n7,8,9,10,11,12\n7,8,9,10,11,12\n7,8,9,10,11,12\n7,8,9,10,11,12";
+            var inputstr, firstip, netbits, netbits2, netbits2_1, netbits_str, netbits_str2,flag;
             inputstr = cform.ip.value.replace(/[^0-9\.\/ ]/g, " ");
             inputstr = inputstr.replace(/[ \t]+/g, " "); // retira espacios al inicio
             inputstr = inputstr.replace(/^\D+/, ""); // retira elementos no digitos al inicio
@@ -332,35 +316,39 @@
                 i++;
             }
             netbits_str = inputstr.match(/\/\d+/);
-            netbits_str2 = inputstr.match(/\/\d+\s\d+/);
-            //document.write(netbits_str,netbits_str2);
-            if (netbits_str.length == 1 && netbits_str2 == null) {
+            if (netbits_str.length == 1 && cform.subredBits.value == " ") {
+                if(cform.sru.value != null){
+                    flag = 0;
+                }
+                else{
+                    flag = 1;
+                }
                 netbits = parseInt(netbits_str[0].replace(/\//, ""), 10); // se obtiene la mascara de subred
             } else {
-                if (netbits_str2.length == 1) {
-                    document.write(ipaddr_usr_input.length);
-                    var maskip = ipaddr_usr_input[1].match(/\d+/g); // se obtiene la mascara sin los puntos
-                    var i = 0;
-                    while (i < 3) {
-                        if (isNaN(maskip[i]) || maskip[i] > 255 || maskip[i] < 0) // se valida el tamaño de cada uno de los octetos
-                        {
-                            cform.errortxt.value = 'ERROR: tamaño de mascara no permitido';
-                            return (1);
-                        }
-                        i++;
-                    }
-                    netbits = calcNWbits(maskip); // se comvierte la mascara en formato simplificado
+                if (cform.subredBits.value != " ") {
+                    netbits2 = parseInt(netbits_str[0].replace(/\//,"")); // se obtiene la mascara de subred pt1
+                    netbits2_1 = parseInt(cform.subredBits.value); // se obtiene la mascara de subred pt2
+                    netbits2 = netbits2 + netbits2_1;
+                    cform.subredBits.value = " ";
+                    calNBFL(cform);
+                    cform.subredBits.value = netbits2_1;
+                    cform.bsr.value = netbits2_1;
+                    cform.bsrh.value = 32 - netbits2;
+                    cform.sru.value = Math.pow(2,netbits2_1)-2;
+                    cform.hupsr.value = Math.pow(2,cform.bsrh.value)-2;
+                    netbits = parseInt(netbits_str[0].replace(/\//, ""), 10); // se obtiene la mascara de subred
                 } else // en caso de que no se reconozca el formato se denota como no valida
                 {
-                    cform.errortxt.value = 'ERROR: mascara no valida' + ipaddr_usr_input.length;
+                    cform.errortxt.value = 'ERROR: mascara no valida';
                     return (1);
                 }
             }
-            if (netbits > 32 || netbits < 0) // se verifica el tamaño de la mascara en formato simplificado
+            if (netbits > 30 || netbits < 0) // se verifica el tamaño de la mascara en formato simplificado
             {
                 cform.errortxt.value = 'ERROR: tamaño de mascara no permitido';
                 return (1);
             }
+            //document.write(netbits);
             rt = calcNWmask(cform, netbits);
             if (rt != 0) // comprueba que si se convirtieran todos los bits de la mascara
             {
@@ -415,8 +403,21 @@
             cform.lastadr_2.value = cform.bcast_2.value;
             cform.lastadr_3.value = cform.bcast_3.value;
             cform.lastadr_4.value = parseInt(cform.bcast_4.value) - 1;
-            //document.write("alv");
-            listHost(cform);
+            //
+            if(flag == 0){
+                cform.bsr.value = 0;
+                cform.bsrh.value = 0;
+                cform.sru.value = 0;
+                cform.hupsr.value = 0;
+            }
+            if(cform.subredBits.value == " "){
+                listHost(cform);
+            }
+            else
+            {
+                subredes(cform);
+                document.getElementById('hu').innerHTML = "";
+            }
             return (0);
         }
     </script>
@@ -433,16 +434,17 @@
     <nav class="navbar navbar-expand justify-content-center bg-dark navbar-dark">
         <ul class="navbar-nav">
             <li class="nav-item">
-                <a class="nav-link">calculadora</a>
+                <a class="nav-link" href="/test/test_1.html">calculadora</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link">autores</a>
+                <a class="nav-link" href="/test/autores.html">autores</a>
             </li>
         </ul>
     </nav>
     <form onsubmit="calNBFL(this);return false;">
         <br>
-        IP/Mascara de subred: <input name="ip" size="32" value="192.168.0.0/24" class="in" type="text">
+        IP/Mascara de subred: <input name="ip" size="15" value="192.168.0.0/24" class="in" type="text">
+        <input name="subredBits" size="2" value=" " class="in" type="text">
         <input value=" calcular " type="submit">
         <input value=" resetear " onclick="resetform4(this.form)" type="button">
         <input value=" aleatorio " onclick="random(this.form)" type="button">
@@ -472,6 +474,34 @@
                     <td>bits para determinar los hosts:</td>
                     <td>
                         <input name="bh" size="10" readonly="readonly" type="text">
+                        <br>
+                    </td>
+                </tr>
+                <tr>
+                    <td>bits para determinar subredes:</td>
+                    <td>
+                        <input name="bsr" size="10" readonly="readonly" type="text">
+                        <br>
+                    </td>
+                </tr>
+                <tr>
+                    <td>bits para subred host:</td>
+                    <td>
+                        <input name="bsrh" size="10" readonly="readonly" type="text">
+                        <br>
+                    </td>
+                </tr>
+                <tr>
+                    <td>subredes usables:</td>
+                    <td>
+                        <input name="sru" size="10" readonly="readonly" type="text">
+                        <br>
+                    </td>
+                </tr>
+                <tr>
+                    <td>host usables por subred:</td>
+                    <td>
+                        <input name="hupsr" size="10" readonly="readonly" type="text">
                         <br>
                     </td>
                 </tr>
@@ -538,7 +568,13 @@
                 <tr>
                     <td> lista de host usables:</td>
                     <td>
-                        <pre id="hu"></pre>
+                        <textarea  style="overflow:auto;resize:none" readonly="readonly" rows="8" cols="50" id="hu"></textarea>
+                    </td>
+                </tr>
+                <tr>
+                    <td> lista de subredes usables:</td>
+                    <td>
+                        <textarea  style="overflow:auto;resize:none" readonly="readonly" rows="8" cols="50" id="sr"></textarea>
                     </td>
                 </tr>
             </tbody>
