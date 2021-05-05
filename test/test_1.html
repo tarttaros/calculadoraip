@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <style>
         div {
@@ -325,9 +324,20 @@
                     {
                         while(thrddigit <= lstthrddigit && i<listh)
                         {
-                            while(frthdigit <= lstfrthdigit+1 && i<listh)
+                            while(frthdigit <= lstfrthdigit && i<listh)
                             {
-                                string1+=frstdigit+"."+scnddigit+"."+thrddigit+"."+frthdigit+"\n";
+                                if(i==0)
+                                {
+                                    string1+=frstdigit+"."+scnddigit+"."+thrddigit+"."+frthdigit+" direccion ip de subred\n";
+                                }
+                                else if(i==listh-1)
+                                {
+                                    string1+=frstdigit+"."+scnddigit+"."+thrddigit+"."+frthdigit+" direccion broadcast de subred\n";
+                                }
+                                else
+                                {
+                                    string1+=frstdigit+"."+scnddigit+"."+thrddigit+"."+frthdigit+" host usable"+"\n";
+                                }
                                 frthdigit++;
                                 i++;
                                 k++;
@@ -363,14 +373,18 @@
                         frstdigit++;
                     }
                 }
+                if(i==listh)
+                {
+                    primero = frstdigit;
+                }
                 //
                 //document.write(frthdigit <= lstfrthdigit+1);
                 i=0;
                 j++;
-
                 frthdigit = cuarto;
                 thrddigit = tercero;
                 scnddigit = segundo;
+                frstdigit = primero;
             }
             document.getElementById('sr').innerHTML = string1;
             return(0);
@@ -474,7 +488,7 @@
             }
             cform.bits.value = "/" + netbits; // se inserta un "/" al mostrar la mascara en formato simplificado
             cform.br.value = netbits;
-            cform.bh.value = 32-netbits;
+            cform.bh.value = 32-(netbits);
             fillhexNWmask(cform); // llena la mascara en hexa
             if (netbits == 31) // en caso de que sea /31 la mascara
             {
@@ -696,6 +710,7 @@
         </table>
     </form>
     <br>
+    <p class="offset-md-3">Nota: tenga en cuenta que la primera y ultima subred no son usables, asi como el primer host es dirreccion de red de esa subred y el ultimo host es la direccion broadcast de la subred.</p>
     <br>
     <br>
     <div class="jumbotron text-center" style="margin-bottom:0">
